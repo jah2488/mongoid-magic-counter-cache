@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "mongoid_counter_cache/version"
+require "mongoid/counter-cache/version"
 
 Gem::Specification.new do |s|
   s.name        = "mongoid_counter_cache"
-  s.version     = MongoidCounterCache::VERSION
+  s.version     = Mongoid::CounterCache::VERSION
   s.authors     = ["Justin Herrick"]
   s.email       = ["justin@justinherrick.com"]
   s.homepage    = "https://github.com/jah2488/mongoid-counter-cache"
@@ -18,5 +18,6 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
+  s.add_dependency("mongoid", "~> 2.0") 
   s.add_development_dependency "rspec"
 end

@@ -1,5 +1,3 @@
-require "mongoid_counter_cache/version"
+require "mongoid/counter-cache/version"
+require "mongoid/counter-cache.rb"
 
-module MongoidCounterCache
-  # Your code goes here...
-end

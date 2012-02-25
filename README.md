@@ -58,6 +58,9 @@ If you do not wish to use the `model_count` naming convention, you can override 
   1. Thoroughly Test embedded associations
   2. Add additional options parameters
   3. Simplify syntax (I.E. including CounterCache will add counts for all `belongs_to` associations on a document 
+
+
+
 ## CONTRIBUTE
 
 If you'd like to contribute, feel free to fork and merge until your heart is content

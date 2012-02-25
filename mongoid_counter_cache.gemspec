@@ -7,9 +7,9 @@ Gem::Specification.new do |s|
   s.version     = MongoidCounterCache::VERSION
   s.authors     = ["Justin Herrick"]
   s.email       = ["justin@justinherrick.com"]
-  s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.homepage    = "https://github.com/jah2488/mongoid-counter-cache"
+  s.summary     = %q{Setup Counter Caches in Mongoid Documents}
+  s.description = %q{A quick and easy way to add counter cache functionality to model/document associations in Mongoid}
 
   s.rubyforge_project = "mongoid_counter_cache"
 

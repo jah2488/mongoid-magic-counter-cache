@@ -1,3 +1,1 @@
-require "mongoid/counter-cache/version"
-require "mongoid/counter-cache.rb"
-
+require "mongoid/counter_cache"

@@ -5,6 +5,7 @@ require "mongoid/counter-cache/version"
 Gem::Specification.new do |s|
   s.name        = "mongoid_counter_cache"
   s.version     = Mongoid::CounterCache::VERSION
+  s.platform    = Gem::Platform::RUBY
   s.authors     = ["Justin Herrick"]
   s.email       = ["justin@justinherrick.com"]
   s.homepage    = "https://github.com/jah2488/mongoid-counter-cache"
@@ -18,6 +19,9 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency("mongoid", "~> 2.0") 
+  s.add_dependency("mongoid", "2.2") 
+  s.add_dependency("rake")
+  s.add_dependency("bson_ext","~> 1.5")
   s.add_development_dependency "rspec"
+  s.add_development_dependency "pry"
 end

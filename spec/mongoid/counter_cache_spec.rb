@@ -7,10 +7,11 @@ module Mongoid
     describe ".counter_cache" do
 
       context "when the document is associated" do
+
         before do
           Library.delete_all
-          Book.delete_all
         end
+
         let(:library) do
           Library.new
         end
@@ -20,34 +21,57 @@ module Mongoid
         end
 
         before do
-          library.books = [ book ]
+          library.save
+          library.books.create(:title => "War and Peace")
         end
 
         it "sets the target of the relation" do
-          library.books.should == [ book ]
+          library.books.first.title.should == "War and Peace"
         end
 
         it "should have 1 book in books" do
-          library.books.count.should == 1
+          library.books.size.should == 1
         end
 
         it "should have 1 song in counter" do
-          library.books.count.should == library.book_count
+          library.book_count.should == 1
+        end
+
+        it "should have book_count and relation count equal" do
+          library.book_count.should == library.books.size
         end
 
         it "sets the counter cache equal to the relation count on addition" do
           5.times do |n|
             library.books << Book.new
-            library.books.count.should == library.book_count
+            library.book_count.should == library.books.size
           end
         end
-        it "decreases the counter cache when records are deleted" do
-          library.books.delete_all
-          library.books.count.should == 0
+
+        it "should increase counter when new books are added" do
+          library.books.push( book )
+          library.books.size.should == 2
         end
+
+        it "should increase counter when new books are added" do
+          library.books.push( book )
+          library.books.size.should == library.book_count
+        end
+
+        it "should increase counter when new books are added" do
+          library.books.push( book )
+          book.destroy
+          library.books.size.should == 1
+        end
+
+        it "should increase counter when new books are added" do
+          library.books.push( book )
+          book.destroy
+          library.books.size.should == library.book_count
+        end
+
         it "decreases the counter cache when records are deleted" do
-          library.books.delete_all
-          library.books.count.should == library.book_count
+          library.book_count.should == library.books.entries.size
         end
 
         context "when the referenced document has an embedded document" do
@@ -58,14 +82,15 @@ module Mongoid
 
           before do
             book.pages.create(:title => "it was a long and stormy night")
+            library.books << book
           end
 
           it "should have 1 page in pages" do
-            book.pages.length.should == 1
+            book.pages.size.should == 1
           end 
 
           it "should be accessible through parent" do
-            library.books.first.pages.length.should == 1
+            library.books.last.pages.size.should == 1
           end
 
           it "should have 1 page in counter" do
@@ -132,33 +157,43 @@ module Mongoid
         end
       end
 
-      context "when the field is specified directly" do
+      context "when the field is specified directly in an associated context" do
+
         before do
           Person.delete_all
         end
-        
+
         let(:person) do
           Person.new
         end
-        
+
         let(:feeling) do
           Feeling.new
         end
 
         before do
-          person.feelings = [ feeling ]
-        end
-
-        it "should association relation correctly" do
-          person.feelings == [ feeling ]
+          person.save
+          person.feelings.create
         end
 
         it "should have 1 feeling in feelings" do
-          person.feelings.length.should == 1
+          person.feelings.size.should == 1
         end
 
         it "should have 1 feeling in counter" do
-         person.feelings.length.should == person.all_my_feels 
+         person.all_my_feels.should == person.feelings.size
+        end
+
+        it "sets the counter cache equal to the relation count on addition" do
+          5.times do |n|
+            person.feelings.create
+            person.feelings.size.should == person.all_my_feels
+          end
+        end
+        it "decreases the counter cache when records are deleted" do
+          person.feelings.push( feeling )
+          feeling.destroy
+          person.all_my_feels.should == person.feelings.size
         end
       end
     end

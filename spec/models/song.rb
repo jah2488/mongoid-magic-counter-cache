@@ -1,6 +1,6 @@
 class Song
   include Mongoid::Document
-  include Mongoid::CounterCache
+  include Mongoid::MagicCounterCache
   embedded_in   :album
   counter_cache :album
   field :title

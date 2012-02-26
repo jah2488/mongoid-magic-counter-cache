@@ -1,6 +1,6 @@
 class Book
   include Mongoid::Document
-  include Mongoid::CounterCache
+  include Mongoid::MagicCounterCache
 
   belongs_to :library
   embeds_many :pages

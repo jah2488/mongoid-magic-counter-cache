@@ -3,10 +3,10 @@ require "mongoid"
 require "bundler/setup"
 require "rspec"
 require "pry"
-require File.expand_path("../../lib/mongoid_counter_cache", __FILE__)
+require File.expand_path("../../lib/mongoid_magic_counter_cache", __FILE__)
 
 Mongoid.configure do |config|
-    name = "mongoid_counter_cache_test"
+    name = "mongoid_magic_counter_cache_test"
     config.master = Mongo::Connection.new.db(name)
 end
 

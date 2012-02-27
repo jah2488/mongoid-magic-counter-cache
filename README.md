@@ -40,7 +40,7 @@ Then in the referrenced/Embedded document. Include `Mongoid::MagicCounterCache`
       field :last
 
       belongs_to    :library
-      magic_counter_cache :library
+      counter_cache :library
     end
 
 
@@ -51,7 +51,7 @@ Then in the referrenced/Embedded document. Include `Mongoid::MagicCounterCache`
 
 If you do not wish to use the `model_count` naming convention, you can override the defaults by specifying the `:field` parameter.
 
-    magic_counter_cache :library, :field => "total_amount_of_books"
+    counter_cache :library, :field => "total_amount_of_books"
 
 ## TODO
 

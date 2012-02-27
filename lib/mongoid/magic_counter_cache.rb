@@ -78,6 +78,8 @@ module Mongoid #:nodoc:
         end
 
       end
+
+      alias :magic_counter_cache :counter_cache
     end
 
   end

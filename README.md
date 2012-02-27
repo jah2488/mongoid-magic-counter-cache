@@ -1,10 +1,11 @@
-Mongoid Magic Counter Cache
+Mongoid Magic Counter Cache [![Build Status](https://secure.travis-ci.org/jah2488/mongoid-magic-counter-cache.png?branch=master)](http://travis-ci.org/jah2488/mongoid-magic-counter-cache)
 =======
 
 ## DESCRIPTION
 
 Mongoid Counter Cache is a simple mongoid extension to add basic counter cache functionality to Embedded and Referenced Mongoid Documents.
-
+### RDOC
+[http://rdoc.info/github/jah2488/mongoid-magic-counter-cache/master/frames](http://rdoc.info/github/jah2488/mongoid-magic-counter-cache/master/frames)
 
 ## INSTALLATION
 

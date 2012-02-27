@@ -56,9 +56,8 @@ If you do not wish to use the `model_count` naming convention, you can override 
 
 ## TODO
 
-  1. Thoroughly Test embedded associations
-  2. Add additional options parameters
-  3. Simplify syntax (I.E. including MagicCounterCache will add counts for all `belongs_to` associations on a document 
+  1. Add additional options parameters
+  2. Simplify syntax (I.E. including MagicCounterCache will add counts for all `belongs_to` associations on a document
 
 
 

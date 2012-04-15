@@ -1,5 +1,4 @@
 require 'mongoid'
-require 'pry'
 module Mongoid #:nodoc:
 
   # The Counter Cache will yada yada

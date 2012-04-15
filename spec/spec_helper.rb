@@ -2,7 +2,6 @@ require "rubygems"
 require "mongoid"
 require "bundler/setup"
 require "rspec"
-require "pry"
 require File.expand_path("../../lib/mongoid_magic_counter_cache", __FILE__)
 
 Mongoid.configure do |config|

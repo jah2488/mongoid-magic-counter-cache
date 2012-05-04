@@ -50,7 +50,7 @@ module Mongoid #:nodoc:
         if options[:field]
           counter_name = "#{options[:field].to_s}"
         else
-          counter_name = "#{model_name.downcase}_count"
+          counter_name = "#{model_name.demodulize.underscore}_count"
         end
         after_create  do |doc|
           if doc.embedded?

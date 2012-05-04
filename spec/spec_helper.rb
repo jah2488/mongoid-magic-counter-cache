@@ -9,7 +9,7 @@ Mongoid.configure do |config|
     config.master = Mongo::Connection.new.db(name)
 end
 
-Dir["#{File.dirname(__FILE__)}/models/*.rb"].each { |f| require f }
+Dir["#{File.dirname(__FILE__)}/models/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |c|
     c.mock_with :rspec

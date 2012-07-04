@@ -21,6 +21,5 @@ Gem::Specification.new do |s|
 
   s.add_dependency("mongoid", "~> 2.0") 
   s.add_dependency("rake")
-  s.add_dependency("bson_ext","~> 1.5")
   s.add_development_dependency "rspec"
 end

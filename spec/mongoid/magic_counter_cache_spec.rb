@@ -88,6 +88,7 @@ module Mongoid
           end
 
           before do
+            book.save
             book.pages.create(:title => "it was a long and stormy night")
             library.books << book
           end
@@ -133,6 +134,7 @@ module Mongoid
         end
 
         before do
+          album.save
           album.songs.create(:title => "create you a song")
         end
 

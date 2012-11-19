@@ -10,49 +10,54 @@ Mongoid Counter Cache is a simple mongoid extension to add basic counter cache f
 ## INSTALLATION
 
 ### RubyGems
-
-    $ [sudo] gem install mongoid_magic_counter_cache
-
+````sh
+$ [sudo] gem install mongoid_magic_counter_cache
+````
 ### GemFile
-
-    gem 'mongoid_magic_counter_cache'
-
+````rb
+gem 'mongoid_magic_counter_cache'
+````
 ## USAGE
 
 First add a field to the document where you will be accessing the counter cache from.
 
-    class Library
-      include Mongoid::Document
+````rb
+class Library
+  include Mongoid::Document
 
-      field :name
-      field :city
-      field :book_count
-      has_many :books
+  field :name
+  field :city
+  field :book_count
+  has_many :books
 
-    end
-
+end
+````
 Then in the referrenced/Embedded document. Include `Mongoid::MagicCounterCache`
 
-    class Book
-      include Mongoid::Document
-      include Mongoid::MagicCounterCache
+````rb
+class Book
+  include Mongoid::Document
+  include Mongoid::MagicCounterCache
 
-      field :first
-      field :last
+  field :first
+  field :last
 
-      belongs_to    :library
-      counter_cache :library
-    end
+  belongs_to    :library
+  counter_cache :library
+end
+````
 
-
-    => @library.book_count
-    => 990
-
+````rb
+$ @library.book_count
+#=> 990
+````
 ### Alternative Syntax
 
 If you do not wish to use the `model_count` naming convention, you can override the defaults by specifying the `:field` parameter.
 
-    counter_cache :library, :field => "total_amount_of_books"
+````rb
+counter_cache :library, :field => "total_amount_of_books"
+````
 
 ## TODO
 

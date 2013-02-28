@@ -1,4 +1,4 @@
-Mongoid Magic Counter Cache [![Build Status](https://secure.travis-ci.org/jah2488/mongoid-magic-counter-cache.png?branch=master)](http://travis-ci.org/jah2488/mongoid-magic-counter-cache)
+Mongoid Magic Counter Cache [![Build Status](https://secure.travis-ci.org/jah2488/mongoid-magic-counter-cache.png?branch=master)](http://travis-ci.org/jah2488/mongoid-magic-counter-cache) [![Code Climate](https://codeclimate.com/github/jah2488/mongoid-magic-counter-cache.png)](https://codeclimate.com/github/jah2488/mongoid-magic-counter-cache)
 =======
 
 ## DESCRIPTION

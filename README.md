@@ -9,6 +9,8 @@ Mongoid Counter Cache is a simple mongoid extension to add basic counter cache f
 
 ## INSTALLATION
 
+#### Mongoid Magic Counter Cache requires ruby `1.9.3` at a minimum
+
 ### RubyGems
 ````sh
 $ [sudo] gem install mongoid_magic_counter_cache

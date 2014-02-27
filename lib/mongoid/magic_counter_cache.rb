@@ -46,32 +46,60 @@ module Mongoid #:nodoc:
       def counter_cache(*args, &block)
         options = args.extract_options!
         name    = options[:class] || args.first.to_s
-
+        
         if options[:field]
           counter_name = "#{options[:field].to_s}"
         else
-          counter_name = "#{model_name.demodulize.underscore}_count"
+          counter_name = "#{model_name.name.demodulize.underscore}_count"
         end
+
+        condition = options[:if]
+
         after_create  do |doc|
-          if doc.embedded?
-            parent = doc._parent
-            parent.inc(counter_name.to_sym, 1) if parent.respond_to? counter_name
-          else
-            relation = doc.send(name)
-            if relation && relation.class.fields.keys.include?(counter_name)
-              relation.inc(counter_name.to_sym,  1)
+          result = condition.nil? ? true : condition.call(doc)
+            #condition.each do |key, value|
+            #  if doc.fields.keys.include?(key) and doc[key.to_sym] == value
+            #  else
+            #    result = false
+            #    break
+            #  end
+            #end
+          #end
+
+          if result 
+            if doc.embedded?
+              parent = doc._parent
+              parent.inc(counter_name.to_sym => 1) if parent.respond_to? counter_name
+            else
+              relation = doc.send(name)
+              if relation && relation.class.fields.keys.include?(counter_name)
+                relation.inc(counter_name.to_sym =>  1)
+              end
             end
           end
         end
 
         after_destroy do |doc|
-          if doc.embedded?
-            parent = doc._parent
-            parent.inc(counter_name.to_sym, -1) if parent.respond_to? counter_name
-          else
-            relation = doc.send(name)
-            if relation && relation.class.fields.keys.include?(counter_name)
-              relation.inc(counter_name.to_sym, -1)
+          result = condition.nil? ? true : condition.call(doc)
+          #if condition 
+          #  condition.each do |key, value|
+          #    if doc.fields.keys.include?(key) and doc[key.to_sym] == value
+          #    else
+          #      result = false
+          #      break
+          #    end
+          #  end
+          #end
+
+          if result 
+            if doc.embedded?
+              parent = doc._parent
+              parent.inc(counter_name.to_sym => -1) if parent.respond_to? counter_name
+            else
+              relation = doc.send(name)
+              if relation && relation.class.fields.keys.include?(counter_name)
+                relation.inc(counter_name.to_sym => -1)
+              end
             end
           end
         end

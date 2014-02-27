@@ -6,7 +6,7 @@ module Mongoid
 
     describe ".counter_cache" do
 
-      context "when the document is associated" do
+      context "when the document is associatedi without condition" do
 
         before do
           Library.delete_all
@@ -81,6 +81,7 @@ module Mongoid
           book.foreign_publication_count.should == 1
         end
 
+
         context "when the referenced document has an embedded document" do
 
           let(:page) do
@@ -119,6 +120,7 @@ module Mongoid
         end
 
       end
+
       context "when the document is embedded" do
 
         before do
@@ -203,6 +205,79 @@ module Mongoid
           person.feelings.push( feeling )
           feeling.destroy
           person.all_my_feels.should == person.feelings.size
+        end
+      end
+
+      context "when the document is associated with condition" do
+
+        before do
+          Post.delete_all
+        end
+
+        let(:post) do
+          Post.new
+        end
+
+        let(:comment) do
+          Comment.new(:is_published => true)
+        end
+
+        before do
+          post.save
+          post.comments.create(:remark => "I agree with you", :is_published => true)
+        end
+
+        it "sets the target of the relation" do
+          post.comments.first.remark.should == "I agree with you"
+        end
+
+        it "should have 1 comment for post" do
+          post.comments.size.should == 1
+        end
+
+        it "should have 1 in comment counter" do
+          post.comment_count.should == 1
+        end
+
+        it "sets the counter cache equal to the relation count on addition" do
+          5.times do |n|
+            post.comments << Comment.new(:is_published => true)
+            post.comment_count.should == post.comments.size 
+          end
+        end
+
+        it "should increase counter when new books are added" do
+          post.comments.push( comment )
+          post.comments.size.should == 2
+        end
+
+        it "should increase counter when new books are added" do
+          post.comments.push( comment )
+          post.comments.size.should == post.comment_count
+        end
+
+        it "should decrease counter when published comment is deleted" do
+          post.comments.push( comment )
+          comment.destroy
+          post.comments.size.should == 1
+        end
+
+        it "should increase counter when new books are added" do
+          post.comments.push( comment )
+          comment.destroy
+          post.comments.size.should == post.comment_count
+        end
+
+        it "shouldnot increase counter when unpublished comment is added" do
+          post.comments << Comment.new
+          post.comments.size.should == post.comment_count + 1
+        end
+
+        it "shouldnot decrease counter when unpublished comment is deleted" do
+          post.comments << Comment.new(:remark => "2nd comment")
+          post.comments << Comment.new(:remark => "3rd comment", :is_published => true)
+          Comment.where(:remark == "2nd comment").first.destroy
+          post.comment_count.should == 2
         end
       end
     end

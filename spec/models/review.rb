@@ -6,5 +6,5 @@ class Review
   counter_cache :article, :if => Proc.new { |act| (act.is_published)  }
 
   field :comment
-  field :is_published, type: Mongoid::Boolean, default: false
+  field :is_published, type: Boolean, default: false
 end

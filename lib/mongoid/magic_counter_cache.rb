@@ -57,14 +57,6 @@ module Mongoid #:nodoc:
 
         after_create  do |doc|
           result = condition.nil? ? true : condition.call(doc)
-            #condition.each do |key, value|
-            #  if doc.fields.keys.include?(key) and doc[key.to_sym] == value
-            #  else
-            #    result = false
-            #    break
-            #  end
-            #end
-          #end
 
           if result 
             if doc.embedded?
@@ -81,15 +73,6 @@ module Mongoid #:nodoc:
 
         after_destroy do |doc|
           result = condition.nil? ? true : condition.call(doc)
-          #if condition 
-          #  condition.each do |key, value|
-          #    if doc.fields.keys.include?(key) and doc[key.to_sym] == value
-          #    else
-          #      result = false
-          #      break
-          #    end
-          #  end
-          #end
 
           if result 
             if doc.embedded?

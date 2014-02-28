@@ -280,6 +280,62 @@ module Mongoid
           post.comment_count.should == 2
         end
       end
+
+      context "when the document is embedded and has condition for counter" do
+
+        before do
+          Article.delete_all
+        end
+
+        let(:article) do
+          Article.new
+        end
+
+        let(:review) do
+          Review.new(:comment => "This is nice article")
+        end
+
+        before do
+          article.save
+          article.reviews.create(:comment => "This is very good article", :is_published => true)
+        end
+
+        it "should have 1 review in reviews" do
+          article.reviews.length.should == 1
+        end
+
+        it "should have correct comment" do
+          article.reviews.first.comment.should == "This is very good article"
+        end
+
+        it "should have 1 review in counter" do
+          article.review_count.should == 1
+        end
+
+        it "sets the counter cache equal to the relation count" do
+          article.reviews.length.should == article.review_count
+        end
+
+        it "sets the counter cache equal to the relation count on addition" do
+          5.times do |n|
+            article.reviews << Review.new(:is_published => true)
+            article.reviews.length.should == article.review_count
+          end
+        end
+
+        it "decreases the counter cache when records are deleted" do
+          article.reviews.all.destroy
+          article.reviews.length.should == article.review_count
+        end
+
+        it "counter should not get incremented if condition is not meet" do
+          5.times do |n|
+            article.reviews << Review.new
+          end
+          article.reviews.length.should == 6 
+          article.review_count.should == 1
+        end
+      end
     end
 
   end

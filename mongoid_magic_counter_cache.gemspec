@@ -10,8 +10,9 @@ Gem::Specification.new do |s|
   s.email       = ["justin@justinherrick.com"]
   s.homepage    = "https://github.com/jah2488/mongoid-magic-counter-cache"
   s.summary     = %q{Setup Counter Caches in Mongoid Documents}
-  s.description = %q{A quick and easy way to add counter cache functionality to model/document associations in Mongoid}
-
+  s.description = %q{A quick and easy way to add counter cache functionality to model - document associations in Mongoid}
+  s.license     = 'MIT'
+  
   s.rubyforge_project = "mongoid_magic_counter_cache"
 
   s.files         = `git ls-files`.split("\n")

@@ -1,4 +1,5 @@
 require 'mongoid'
+require 'mongoid/version'
 module Mongoid #:nodoc:
 
   # The Counter Cache will yada yada
@@ -46,8 +47,7 @@ module Mongoid #:nodoc:
       def counter_cache(*args, &block)
         options = args.extract_options!
         name    = options[:class] || args.first.to_s
-        #version = Mongoid::VERSION::STRING
-        version = system('bundle show | grep "* mongoid (4."')
+        version = (Mongoid::VERSION.to_i >= 4) ? true : false
         
         if options[:field]
           counter_name = "#{options[:field].to_s}"

@@ -1,7 +1,6 @@
 require 'mongoid'
 require 'mongoid/version'
 module Mongoid #:nodoc:
-
   # The Counter Cache will yada yada
   #
   #    class Person
@@ -42,13 +41,33 @@ module Mongoid #:nodoc:
   module MagicCounterCache
     extend ActiveSupport::Concern
 
+    module LegacyCache
+      def actual_model_name
+        model_name
+      end
+
+      def increment_association(association, counter_name, inc)
+        association.inc(counter_name, inc)
+      end
+    end
+
+    module ModernCache
+      def actual_model_name
+        model_name.name
+      end
+
+      def increment_association(association, counter_name, inc)
+        association.inc(counter_name => inc)
+      end
+    end
+
     module ClassMethods
+      include (Mongoid::VERSION.to_i >= 4) ? ModernCache : LegacyCache
 
       def counter_cache(*args, &block)
         options       = args.extract_options!
         name          = options[:class] || args.first.to_s
-        version       = (Mongoid::VERSION.to_i >= 4) ? true : false
-        counter_name  = get_counter_name(options, version)
+        counter_name  = get_counter_name(options)
         condition     = options[:if]
 
         callback_proc = ->(doc, inc) do
@@ -57,12 +76,12 @@ module Mongoid #:nodoc:
           if doc.embedded?
             parent = doc._parent
             if parent.respond_to?(counter_name)
-              increment_association(parent, counter_name.to_sym, inc, version)
+              increment_association(parent, counter_name.to_sym, inc)
             end
           else
             relation = doc.send(name)
             if relation && relation.class.fields.keys.include?(counter_name)
-              increment_association(relation, counter_name.to_sym, inc, version)
+              increment_association(relation, counter_name.to_sym, inc)
             end
           end
         end
@@ -76,24 +95,13 @@ module Mongoid #:nodoc:
 
       private
 
-      def get_counter_name(options, version)
-        return "#{options[:field].to_s}" if options[:field]
-        "#{actual_model_name(version).demodulize.underscore}_count"
-      end
-
-      def actual_model_name(version)
-        return model_name.name if version
-        model_name
+      def get_counter_name(options)
+        options.fetch(:field, "#{actual_model_name.demodulize.underscore}_count").to_s
       end
 
       def condition_result(condition, doc)
         return true if condition.nil?
         condition.call(doc)
-      end
-
-      def increment_association(association, counter_name, inc, version)
-        association.inc(counter_name => inc) if version
-        association.inc(counter_name, inc)
       end
     end
   end

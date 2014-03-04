@@ -45,74 +45,56 @@ module Mongoid #:nodoc:
     module ClassMethods
 
       def counter_cache(*args, &block)
-        options = args.extract_options!
-        name    = options[:class] || args.first.to_s
-        version = (Mongoid::VERSION.to_i >= 4) ? true : false
-        
-        if options[:field]
-          counter_name = "#{options[:field].to_s}"
-        else
-          if version
-            counter_name = "#{model_name.name.demodulize.underscore}_count"
+        options       = args.extract_options!
+        name          = options[:class] || args.first.to_s
+        version       = (Mongoid::VERSION.to_i >= 4) ? true : false
+        counter_name  = get_counter_name(options, version)
+        condition     = options[:if]
+
+        callback_proc = ->(doc, inc) do
+          result = condition_result(condition, doc)
+          return unless result
+          if doc.embedded?
+            parent = doc._parent
+            if parent.respond_to?(counter_name)
+              increment_association(parent, counter_name.to_sym, inc, version)
+            end
           else
-            counter_name = "#{model_name.demodulize.underscore}_count"
-          end
-        end
-
-        condition = options[:if]
-
-        after_create  do |doc|
-          result = condition.nil? ? true : condition.call(doc)
-
-          if result 
-            if doc.embedded?
-              parent = doc._parent
-              if version
-                parent.inc(counter_name.to_sym => 1) if parent.respond_to? counter_name
-              else
-                parent.inc(counter_name.to_sym, 1) if parent.respond_to? counter_name
-              end
-            else
-              relation = doc.send(name)
-              if relation && relation.class.fields.keys.include?(counter_name)
-                if version
-                  relation.inc(counter_name.to_sym => 1)
-                else
-                  relation.inc(counter_name.to_sym, 1)
-                end
-              end
+            relation = doc.send(name)
+            if relation && relation.class.fields.keys.include?(counter_name)
+              increment_association(relation, counter_name.to_sym, inc, version)
             end
           end
         end
 
-        after_destroy do |doc|
-          result = condition.nil? ? true : condition.call(doc)
-
-          if result 
-            if doc.embedded?
-              parent = doc._parent
-              if version
-                parent.inc(counter_name.to_sym => -1) if parent.respond_to? counter_name
-              else
-                parent.inc(counter_name.to_sym, -1) if parent.respond_to? counter_name
-              end
-            else
-              relation = doc.send(name)
-              if relation && relation.class.fields.keys.include?(counter_name)
-                if version
-                  relation.inc(counter_name.to_sym => -1)
-                else
-                  relation.inc(counter_name.to_sym, -1)
-                end
-              end
-            end
-          end
-        end
+        after_create( ->(doc) { callback_proc.call(doc,  1) })
+        after_destroy(->(doc) { callback_proc.call(doc, -1) })
 
       end
 
       alias :magic_counter_cache :counter_cache
-    end
 
+      private
+
+      def get_counter_name(options, version)
+        return "#{options[:field].to_s}" if options[:field]
+        "#{actual_model_name(version).demodulize.underscore}_count"
+      end
+
+      def actual_model_name(version)
+        return model_name.name if version
+        model_name
+      end
+
+      def condition_result(condition, doc)
+        return true if condition.nil?
+        condition.call(doc)
+      end
+
+      def increment_association(association, counter_name, inc, version)
+        association.inc(counter_name => inc) if version
+        association.inc(counter_name, inc)
+      end
+    end
   end
 end

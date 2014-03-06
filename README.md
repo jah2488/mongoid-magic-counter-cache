@@ -61,13 +61,47 @@ If you do not wish to use the `model_count` naming convention, you can override 
 counter_cache :library, :field => "total_amount_of_books"
 ````
 
+
+### Conditional Counter
+
+If you want to maintain counter based on certain condition, then you can specify it using `:if`
+
+````rb
+class Post 
+  include Mongoid::Document
+
+  field :article
+  field :comment_count
+
+  has_many :comments
+
+end
+````
+Then in the referrenced/Embedded document, add condition for counter using `:if`
+
+````rb
+class Comment
+  include Mongoid::Document
+  include Mongoid::MagicCounterCache
+
+  belongs_to :post
+
+  field :remark
+  field :is_published, type: Boolean, default: false
+
+  counter_cache :post, :if => Proc.new { |act| (act.is_published)  }
+end
+````
+
+comment_count will get incremented / decremented only when `:if` condition returns `true`
+
 ## TODO
 
-  1. Add additional options parameters
-  2. Simplify syntax (I.E. including MagicCounterCache will add counts for all `belongs_to` associations on a document
+1. Add additional options parameters
+2. Simplify syntax (I.E. including MagicCounterCache will add counts for all `belongs_to` associations on a document
 
 
 
 ## CONTRIBUTE
 
-If you'd like to contribute, feel free to fork and merge until your heart is content
+    If you'd like to contribute, feel free to fork and merge until your heart is content

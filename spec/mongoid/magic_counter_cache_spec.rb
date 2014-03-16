@@ -6,7 +6,7 @@ module Mongoid
 
     describe ".counter_cache" do
 
-      context "when the document is associatedi without condition" do
+      context "when the document is associated without condition" do
 
         before do
           Library.delete_all
@@ -279,6 +279,44 @@ module Mongoid
           Comment.where(:remark == "2nd comment").first.destroy
           post.comment_count.should == 2
         end
+
+        context "if update condition" do
+          it "should not increase counter when old unpublished comment is published" do
+            new_comment = Comment.new
+            post.comments << new_comment
+            post.comments.size.should == post.comment_count + 1
+
+            new_comment.is_published.should == false
+            new_comment.is_published = true
+            new_comment.save!
+
+            post.comments.size.should == post.comment_count + 1
+          end
+
+          it "should not decrease counter when old published comment is unpublished" do
+            new_comment = Comment.new(:is_published => true)
+            post.comments << new_comment
+            post.comments.size.should == post.comment_count
+
+            new_comment.is_published.should == true
+            new_comment.is_published = false
+            new_comment.save!
+
+            post.comments.size.should == post.comment_count
+          end
+
+          it "should not modify counter when publish field is not dirty" do
+            new_comment = Comment.new
+            post.comments << new_comment
+            post.comments.size.should == post.comment_count + 1
+
+            new_comment.is_published.should == false
+            new_comment.remark = 'New Remark'
+            new_comment.save!
+
+            post.comments.size.should == post.comment_count + 1
+          end
+        end
       end
 
       context "when the document is embedded and has condition for counter" do
@@ -334,6 +372,264 @@ module Mongoid
           end
           article.reviews.length.should == 6 
           article.review_count.should == 1
+        end
+
+        context "if update condition" do
+          it "should not increase counter when old unpublished review is published" do
+            new_review = Review.new
+            article.reviews << new_review
+            article.reviews.size.should == article.review_count + 1
+
+            new_review.is_published.should == false
+            new_review.is_published = true
+            new_review.save!
+
+            article.reviews.size.should == article.review_count + 1
+          end
+
+          it "should not decrease counter when old published review is unpublished" do
+            new_review = Review.new(:is_published => true)
+            article.reviews << new_review
+            article.reviews.size.should == article.review_count
+
+            new_review.is_published.should == true
+            new_review.is_published = false
+            new_review.save!
+
+            article.reviews.size.should == article.review_count
+          end
+
+          it "should not modify counter when published field is not dirty" do
+            new_review = Review.new
+            article.reviews << new_review
+            article.reviews.size.should == article.review_count + 1
+
+            new_review.is_published.should == false
+            new_review.comment = 'New Comment'
+            new_review.save!
+
+            article.reviews.size.should == article.review_count + 1
+          end
+        end
+      end
+    end
+
+    describe ".counter_cache with if_update" do
+
+      context "when the document is associated with condition" do
+
+        before do
+          Post.delete_all
+        end
+
+        let(:post) do
+          Post.new
+        end
+
+        let(:comment) do
+          UpdateComment.new(:is_published => true)
+        end
+
+        before do
+          post.save
+          post.update_comments.create(:remark => "I agree with you", :is_published => true)
+        end
+
+        it "sets the target of the relation" do
+          post.update_comments.first.remark.should == "I agree with you"
+        end
+
+        it "should have 1 comment for post" do
+          post.update_comments.size.should == 1
+        end
+
+        it "should have 1 in comment counter" do
+          post.update_comment_count.should == 1
+        end
+
+        it "sets the counter cache equal to the relation count on addition" do
+          5.times do |n|
+            post.update_comments << UpdateComment.new(:is_published => true)
+            post.update_comment_count.should == post.update_comments.size
+          end
+        end
+
+        it "should increase counter when new books are added" do
+          post.update_comments.push( comment )
+          post.update_comments.size.should == 2
+        end
+
+        it "should increase counter when new books are added" do
+          post.update_comments.push( comment )
+          post.update_comments.size.should == post.update_comment_count
+        end
+
+        it "should decrease counter when published comment is deleted" do
+          post.update_comments.push( comment )
+          comment.destroy
+          post.update_comments.size.should == 1
+        end
+
+        it "should increase counter when new books are added" do
+          post.update_comments.push( comment )
+          comment.destroy
+          post.update_comments.size.should == post.update_comment_count
+        end
+
+        it "shouldnot increase counter when unpublished comment is added" do
+          post.update_comments << UpdateComment.new
+          post.update_comments.size.should == post.update_comment_count + 1
+        end
+
+        it "shouldnot decrease counter when unpublished comment is deleted" do
+          post.update_comments << UpdateComment.new(:remark => "2nd comment")
+          post.update_comments << UpdateComment.new(:remark => "3rd comment", :is_published => true)
+          UpdateComment.where(:remark == "2nd comment").first.destroy
+          post.update_comment_count.should == 2
+        end
+
+        context "if update condition" do
+          it "should increase counter when old unpublished comment is published" do
+            new_comment = UpdateComment.new
+            post.update_comments << new_comment
+            post.update_comments.size.should == post.update_comment_count + 1
+
+            new_comment.is_published.should == false
+            new_comment.is_published = true
+            new_comment.save!
+
+            post.update_comments.size.should == post.update_comment_count
+
+            new_comment.save! # Should not increment since is_published is not dirty.
+            post.update_comments.size.should == post.update_comment_count
+          end
+
+          it "should decrease counter when old published comment is unpublished" do
+            new_comment = UpdateComment.new(:is_published => true)
+            post.update_comments << new_comment
+            post.update_comments.size.should == post.update_comment_count
+
+            new_comment.is_published.should == true
+            new_comment.is_published = false
+            new_comment.save!
+
+            post.update_comments.size.should == post.update_comment_count + 1
+
+            new_comment.save! # Should not increment since is_published is not dirty.
+            post.update_comments.size.should == post.update_comment_count + 1
+          end
+
+          it "should not modify counter when publish field is not dirty" do
+            new_comment = UpdateComment.new
+            post.update_comments << new_comment
+            post.update_comments.size.should == post.update_comment_count + 1
+
+            new_comment.is_published.should == false
+            new_comment.remark = 'New Remark'
+            new_comment.save!
+
+            post.update_comments.size.should == post.update_comment_count + 1
+          end
+        end
+      end
+
+      context "when the document is embedded and has condition for counter" do
+
+        before do
+          Article.delete_all
+        end
+
+        let(:article) do
+          Article.new
+        end
+
+        let(:review) do
+          UpdateReview.new(:comment => "This is nice article")
+        end
+
+        before do
+          article.save
+          article.update_reviews.create(:comment => "This is very good article", :is_published => true)
+        end
+
+        it "should have 1 review in reviews" do
+          article.update_reviews.length.should == 1
+        end
+
+        it "should have correct comment" do
+          article.update_reviews.first.comment.should == "This is very good article"
+        end
+
+        it "should have 1 review in counter" do
+          article.update_review_count.should == 1
+        end
+
+        it "sets the counter cache equal to the relation count" do
+          article.update_reviews.length.should == article.update_review_count
+        end
+
+        it "sets the counter cache equal to the relation count on addition" do
+          5.times do |n|
+            article.update_reviews << UpdateReview.new(:is_published => true)
+            article.update_reviews.length.should == article.update_review_count
+          end
+        end
+
+        it "decreases the counter cache when records are deleted" do
+          article.update_reviews.all.destroy
+          article.update_reviews.length.should == article.update_review_count
+        end
+
+        it "counter should not get incremented if condition is not meet" do
+          5.times do |n|
+            article.update_reviews << UpdateReview.new
+          end
+          article.update_reviews.length.should == 6
+          article.update_review_count.should == 1
+        end
+
+        context "if update condition" do
+          it "should increase counter when old unpublished review is published" do
+            new_review = UpdateReview.new
+            article.update_reviews << new_review
+            article.update_reviews.size.should == article.update_review_count + 1
+
+            new_review.is_published.should == false
+            new_review.is_published = true
+            new_review.save!
+
+            article.update_reviews.size.should == article.update_review_count
+
+            new_review.save! # Should not increment since is_published is not dirty.
+            article.update_reviews.size.should == article.update_review_count
+          end
+
+          it "should decrease counter when old published review is unpublished" do
+            new_review = UpdateReview.new(:is_published => true)
+            article.update_reviews << new_review
+            article.update_reviews.size.should == article.update_review_count
+
+            new_review.is_published.should == true
+            new_review.is_published = false
+            new_review.save!
+
+            article.update_reviews.size.should == article.update_review_count + 1
+
+            new_review.save! # Should not decrement since is_published is not dirty.
+            article.update_reviews.size.should == article.update_review_count + 1
+          end
+
+          it "should not modify counter when published field is not dirty" do
+            new_review = UpdateReview.new
+            article.update_reviews << new_review
+            article.update_reviews.size.should == article.update_review_count + 1
+
+            new_review.is_published.should == false
+            new_review.comment = 'New Comment'
+            new_review.save!
+
+            article.update_reviews.size.should == article.update_review_count + 1
+          end
         end
       end
     end

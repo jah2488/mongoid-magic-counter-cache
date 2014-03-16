@@ -95,6 +95,28 @@ end
 
 comment_count will get incremented / decremented only when `:if` condition returns `true`
 
+### Conditional Counter After Update
+
+In conjunction with the conditional counter, if you want to maintain counter after an update to an object, then you can specify it using `:if_update`
+
+Using same example as above, in the referrenced/Embedded document, add an additional condition for counter using `:if_update`
+
+````rb
+class Comment
+  include Mongoid::Document
+  include Mongoid::MagicCounterCache
+
+  belongs_to :post
+
+  field :remark
+  field :is_published, type: Boolean, default: false
+
+  counter_cache :post, :if => Proc.new { |act| (act.is_published)  }, :if_update => Proc.new { |act| act.changes['is_published'] }
+end
+````
+
+When a comment is saved, comment_count will get incremented / decremented if the is_published field is dirty.
+
 ## TODO
 
 1. Add additional options parameters

@@ -71,9 +71,7 @@ module Mongoid #:nodoc:
         condition     = options[:if]
         update_condition = options[:if_update]
 
-        callback_proc = ->(doc, inc) do
-          result = condition_result(condition, doc)
-          return unless result
+        increment_proc = ->(doc, inc) do
           if doc.embedded?
             parent = doc._parent
             if parent.respond_to?(counter_name)
@@ -87,24 +85,17 @@ module Mongoid #:nodoc:
           end
         end
 
+        callback_proc = ->(doc, inc) do
+          result = condition_result(condition, doc)
+          return unless result
+          increment_proc.call(doc, inc)
+        end
+
         update_callback_proc = ->(doc) do
-          return if condition.nil?
-          return if update_condition.nil? # Don't execute if there is no update condition.
+          return if condition.nil? || update_condition.nil? # Don't execute if there is no update condition.
           return unless update_condition.call(doc) # Determine whether to execute update increment/decrements.
-
           inc = condition.call(doc) ? 1 : -1
-
-          if doc.embedded?
-            parent = doc._parent
-            if parent.respond_to?(counter_name)
-              increment_association(parent, counter_name.to_sym, inc)
-            end
-          else
-            relation = doc.send(name)
-            if relation && relation.class.fields.keys.include?(counter_name)
-              increment_association(relation, counter_name.to_sym, inc)
-            end
-          end
+          increment_proc.call(doc, inc)
         end
 
         after_create( ->(doc) { callback_proc.call(doc,  1) })

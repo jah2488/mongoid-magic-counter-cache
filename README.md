@@ -117,11 +117,6 @@ end
 
 When a comment is saved, comment_count will get incremented / decremented if the is_published field is dirty.
 
-## TODO
-
-1. Add additional options parameters
-2. Simplify syntax (I.E. including MagicCounterCache will add counts for all `belongs_to` associations on a document
-
 
 
 ## CONTRIBUTE
